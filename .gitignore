@@ -1,0 +1,12 @@
+node_modules/
+.env
+npm-debug.log*
+.DS_Store
+dist/
+
+/src/generated/prisma
+
+# Vendored skill docs managed by skills-lock.json
+.agents/
+.claude/
+.windsurf/
