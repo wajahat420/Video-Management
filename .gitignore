@@ -6,6 +6,8 @@ dist/
 
 /src/generated/prisma
 
+storage/
+
 # Vendored skill docs managed by skills-lock.json
 .agents/
 .claude/

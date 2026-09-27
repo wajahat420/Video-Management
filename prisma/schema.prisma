@@ -11,3 +11,37 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum VideoStatus {
+  PROCESSING
+  READY
+  FAILED
+}
+
+model Video {
+  id               String      @id @default(cuid())
+
+  originalFilename String
+  mimeType         String
+  fileSizeBytes    BigInt
+
+  storageKey       String
+  thumbnailKey     String?
+
+  durationSeconds  Float?
+  width            Int?
+  height           Int?
+  aspectRatio      String?
+  codec            String?
+  bitrateKbps      Int?
+  fps              Float?
+
+  status           VideoStatus @default(PROCESSING)
+  errorMessage     String?
+
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  @@index([status])
+  @@map("videos")
+}
