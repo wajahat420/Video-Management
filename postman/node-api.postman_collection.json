@@ -1,0 +1,165 @@
+{
+  "info": {
+    "name": "node-api",
+    "description": "Video upload, metadata extraction, and thumbnail generation API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "video_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "health"]
+            }
+          }
+        },
+        {
+          "name": "DB Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/db-check",
+              "host": ["{{base_url}}"],
+              "path": ["api", "db-check"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Videos",
+      "item": [
+        {
+          "name": "Upload Video",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('video_id', body.video.id);",
+                  "  pm.test('Video created with READY or FAILED status', function () {",
+                  "    pm.expect(['READY', 'FAILED']).to.include(body.video.status);",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "video",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/videos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "videos"]
+            },
+            "description": "Upload a video file (multipart/form-data, field name 'video'). Allowed formats: mp4, mov, webm, avi. Max size: 100MB (configurable via MAX_VIDEO_SIZE_BYTES). Select a file in the 'video' form-data field before sending."
+          }
+        },
+        {
+          "name": "Get Video by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/videos/{{video_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "videos", "{{video_id}}"]
+            },
+            "description": "Fetches metadata for a single video. Uses the video_id collection variable, auto-populated after a successful Upload Video request."
+          }
+        },
+        {
+          "name": "List Videos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/videos?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "videos"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Original File",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/storage/videos/{{video_id}}/original.mp4",
+              "host": ["{{base_url}}"],
+              "path": ["storage", "videos", "{{video_id}}", "original.mp4"]
+            },
+            "description": "Streams the original video file. Adjust the extension if the uploaded file wasn't mp4 (mov/webm/avi)."
+          }
+        },
+        {
+          "name": "Get Thumbnail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/storage/videos/{{video_id}}/thumbnail.jpg",
+              "host": ["{{base_url}}"],
+              "path": ["storage", "videos", "{{video_id}}", "thumbnail.jpg"]
+            }
+          }
+        },
+        {
+          "name": "Upload - Rejected (bad extension)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "video",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/videos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "videos"]
+            },
+            "description": "Negative test: attach a file with a disallowed extension (e.g. .mkv, .txt) — expect 400."
+          }
+        }
+      ]
+    }
+  ]
+}
