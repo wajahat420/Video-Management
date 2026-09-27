@@ -1,7 +1,10 @@
 import express from 'express';
 import prisma from '../lib/prisma';
+import videoRoutes from './video.routes';
 
 const router = express.Router();
+
+router.use('/videos', videoRoutes);
 
 router.get('/health', (req, res) => {
   res.json({ status: 'ok' });
